@@ -16,7 +16,7 @@ type config struct {
 	addr string
 }
 
-func (app *application) mount() *chi.Mux {
+func (app *application) mount() http.Handler {
 	r := chi.NewRouter()
 	r.Use(middleware.Logger)
 	r.Route("/v1", func(r chi.Router) {
@@ -26,7 +26,7 @@ func (app *application) mount() *chi.Mux {
 	return r
 }
 
-func (app *application) run(mux *chi.Mux) error {
+func (app *application) run(mux http.Handler) error {
 
 	srv := &http.Server{
 		Addr:         app.config.addr,
