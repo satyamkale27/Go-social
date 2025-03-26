@@ -1,6 +1,8 @@
 package main
 
-import "log"
+import (
+	"log"
+)
 
 func main() {
 	cfg := config{
@@ -10,8 +12,10 @@ func main() {
 	app := &application{
 		config: cfg,
 	}
-	log.Fatal(app.run())
-	
+
+	mux := app.mount()
+	log.Fatal(app.run(mux))
+
 	/*
 		When you call app.run(),
 		Go automatically passes the app pointer to the run method.
