@@ -1,17 +1,20 @@
 package main
 
 import (
+	"github.com/satyamkale27/Go-social.git/internal/env"
 	"log"
+	"os"
 )
 
 func main() {
 	cfg := config{
-		addr: ":8080",
+		addr: env.GetString("ADDR", ":8080"),
 	}
 
 	app := &application{
 		config: cfg,
 	}
+	os.LookupEnv("PATH")
 
 	mux := app.mount()
 	log.Fatal(app.run(mux))
