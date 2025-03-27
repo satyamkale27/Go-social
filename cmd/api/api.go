@@ -18,8 +18,13 @@ type config struct {
 
 func (app *application) mount() http.Handler {
 	r := chi.NewRouter()
-	r.Use(middleware.Recoverer)
+	r.Use(middleware.RequestID)
+	r.Use(middleware.RealIP)
 	r.Use(middleware.Logger) // logs the request data
+	r.Use(middleware.Recoverer)
+
+	r.Use(middleware.Timeout(60 * time.Second))
+
 	r.Route("/v1", func(r chi.Router) {
 		r.Get("/health", app.healthcheckHandler)
 	})
