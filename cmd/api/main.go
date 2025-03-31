@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/satyamkale27/Go-social.git/internal/env"
+	store2 "github.com/satyamkale27/Go-social.git/internal/store"
 	"log"
 	"os"
 )
@@ -11,8 +12,11 @@ func main() {
 		addr: env.GetString("ADDR", ":8080"),
 	}
 
+	store := store2.NewStorage(nil)
+
 	app := &application{
 		config: cfg,
+		store:  store,
 	}
 	os.LookupEnv("PATH")
 
