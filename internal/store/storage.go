@@ -6,17 +6,19 @@ import (
 )
 
 type Storage struct {
+	// note: this is blueprint of NewStorage
+
 	Posts interface {
 		Create(context.Context, *Post) error
 	}
 	users interface {
-		Create(context.Context) error
+		Create(context.Context, *User) error
 	}
 }
 
 func NewStorage(db *sql.DB) Storage {
 	return Storage{
-		Posts: &PostsStore{db},
+		Posts: &PostStore{db},
 		users: &UsersStore{db},
 	}
 }
