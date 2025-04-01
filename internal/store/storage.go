@@ -10,7 +10,7 @@ type Storage struct {
 		Create(context.Context, *Post) error
 	}
 	users interface {
-		Create(ctx context.Context) error
+		Create(context.Context) error
 	}
 }
 
@@ -20,3 +20,16 @@ func NewStorage(db *sql.DB) Storage {
 		users: &UsersStore{db},
 	}
 }
+
+/*
+personal note imp:-
+
+The PostsStore struct has a method Create defined on it.
+When you initialize the Posts field with &PostsStore{db},
+you are creating a pointer to a PostsStore instance.
+This pointer has access to all the methods defined on PostsStore,
+including the Create method.
+
+(PostsStore struct has a method Create defined on it,
+code :  func (s *PostsStore) Create)
+*/
