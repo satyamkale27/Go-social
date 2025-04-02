@@ -1,6 +1,7 @@
 package main
 
 import (
+	db2 "github.com/satyamkale27/Go-social.git/internal/db"
 	"github.com/satyamkale27/Go-social.git/internal/env"
 	store2 "github.com/satyamkale27/Go-social.git/internal/store"
 	"log"
@@ -18,7 +19,17 @@ func main() {
 		},
 	}
 
-	store := store2.NewStorage(nil)
+	db, err := db2.New(
+		cfg.db.addr,
+		cfg.db.maxOpenConns,
+		cfg.db.maxIdleConns,
+		cfg.db.maxIdleTime,
+	)
+	if err != nil {
+		log.Panic(err)
+	}
+
+	store := store2.NewStorage(db)
 
 	app := &application{
 		config: cfg,
