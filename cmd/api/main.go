@@ -8,6 +8,8 @@ import (
 	"os"
 )
 
+const version = "0.0.1"
+
 func main() {
 	cfg := config{
 		addr: env.GetString("ADDR", ":8080"),
@@ -17,6 +19,7 @@ func main() {
 			maxIdleConns: env.GetInt("MAX_IDLE_CONNS", 30),
 			maxIdleTime:  env.GetString("MAX_IDLE_TIME", "15m"),
 		},
+		env: env.GetString("ENV", "development"),
 	}
 
 	db, err := db2.New(
