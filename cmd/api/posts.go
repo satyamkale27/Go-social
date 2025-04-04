@@ -9,6 +9,7 @@ type CreatePostPayload struct {
 	Title   string   `json:"title"`
 	Content string   `json:"content"`
 	Tags    []string `json:"tags"`
+	User_id int      `json:"user_id"`
 }
 
 func (app *application) createPostHandler(w http.ResponseWriter, r *http.Request) {
