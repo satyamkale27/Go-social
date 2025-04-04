@@ -30,4 +30,24 @@ func (app *application) createPostHandler(w http.ResponseWriter, r *http.Request
 		return
 	}
 
+	if err := writeJSON(w, http.StatusCreated, post); err != nil {
+		writeJSONError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	/*
+			The two writeJSONError calls handle different error scenarios:
+
+
+			The first writeJSONError handles errors that occur during the creation of the post
+		    in the database. If app.store.Posts.Create(ctx, post) fails, it returns an error,
+		    and the function responds with an internal server error status and the error message.
+
+
+			The second writeJSONError handles errors that occur while writing the JSON response
+		    back to the client. If writeJSON(w, http.StatusCreated, post) fails, it returns an error,
+		    and the function responds with an internal server error status and the error message.
+
+	*/
+
 }
