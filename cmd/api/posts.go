@@ -54,3 +54,9 @@ func (app *application) createPostHandler(w http.ResponseWriter, r *http.Request
 	*/
 
 }
+
+func (app *application) getPostHandler(w http.ResponseWriter, r *http.Request) {
+	postID := 1
+	ctx := r.Context()
+	post, err := app.store.Posts.GetById(ctx, postID)
+}
