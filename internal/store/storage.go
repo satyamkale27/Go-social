@@ -3,12 +3,18 @@ package store
 import (
 	"context"
 	"database/sql"
+	"errors"
+)
+
+var (
+	ErrNotFound = errors.New("record not found")
 )
 
 type Storage struct {
 	// note: this is blueprint of NewStorage
 
 	Posts interface {
+		GetById(context.Context, int) (*Post, error)
 		Create(context.Context, *Post) error
 	}
 	users interface {
