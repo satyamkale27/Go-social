@@ -43,7 +43,8 @@ func (s *PostStore) GetById(ctx context.Context, postId int64) (*Post, error) {
 	var post Post
 
 	err := s.db.QueryRowContext(ctx, query, postId).Scan(
-		&post.Id, &post.Content, &post.Title, &post.UserID, &post.Tags, &post.CreatedAt, pq.Array(&post.Tags))
+		&post.Id, &post.Content, &post.Title, &post.UserID, pq.Array(&post.Tags), &post.CreatedAt, &post.UpdatedAt,
+	)
 	if err != nil {
 		switch {
 		case errors.Is(err, sql.ErrNoRows):

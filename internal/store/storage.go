@@ -14,7 +14,7 @@ type Storage struct {
 	// note: this is blueprint of NewStorage
 
 	Posts interface {
-		GetById(context.Context, int) (*Post, error)
+		GetById(context.Context, int64) (*Post, error)
 		Create(context.Context, *Post) error
 	}
 	users interface {
