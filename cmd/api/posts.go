@@ -2,6 +2,7 @@ package main
 
 import (
 	"errors"
+	"fmt"
 	"github.com/go-chi/chi/v5"
 	"github.com/satyamkale27/Go-social.git/internal/store"
 	"net/http"
@@ -19,6 +20,11 @@ func (app *application) createPostHandler(w http.ResponseWriter, r *http.Request
 	var payload CreatePostPayload
 	if err := readJSON(w, r, &payload); err != nil {
 		app.badRequestResponse(w, r, err)
+		return
+	}
+
+	if payload.Content == "" {
+		app.badRequestResponse(w, r, fmt.Errorf("content is required"))
 		return
 	}
 
