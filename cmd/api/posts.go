@@ -10,6 +10,10 @@ import (
 	"strconv"
 )
 
+type postKey string
+
+const postCtx postKey = "post"
+
 type CreatePostPayload struct {
 	Title   string   `json:"title" validate:"required,max=100"`
 	Content string   `json:"content" validate:"required,max=1000"`
@@ -20,6 +24,17 @@ type CreatePostPayload struct {
 func (app *application) createPostHandler(w http.ResponseWriter, r *http.Request) {
 	var payload CreatePostPayload
 	if err := readJSON(w, r, &payload); err != nil {
+
+		/*
+         note:-
+
+		In the createPostHandler function, the payload of type CreatePostPayload
+		gets its values assigned from the HTTP request body provided by the user.
+		This is done using the readJSON function, which parses the JSON payload
+		from the request body into the payload struct.
+
+		 */
+
 		app.badRequestResponse(w, r, err)
 		return
 	}
@@ -70,26 +85,10 @@ func (app *application) createPostHandler(w http.ResponseWriter, r *http.Request
 }
 
 func (app *application) getPostHandler(w http.ResponseWriter, r *http.Request) {
-	idParam := chi.URLParam(r, "postId")
-	id, err := strconv.ParseInt(idParam, 10, 64)
-	if err != nil {
-		app.internalServerError(w, r, err)
-		return
-	}
 
-	ctx := r.Context()
-	post, err := app.store.Posts.GetById(ctx, id)
-	if err != nil {
-		switch {
-		case errors.Is(err, store.ErrNotFound):
-			app.notFoundResponse(w, r, err)
-		default:
-			app.internalServerError(w, r, err)
-		}
-		return
-	}
+	post := getPostFromContext(r)
 
-	comments, err := app.store.Comments.GetByPostID(ctx, id)
+	comments, err := app.store.Comments.GetByPostID(r.Context(), post.Id)
 	if err != nil {
 		app.internalServerError(w, r, err)
 		return
@@ -126,11 +125,19 @@ func (app *application) deletePostHandler(w http.ResponseWriter, r *http.Request
 }
 
 func (app *application) updatePostHandler(w http.ResponseWriter, r *http.Request) {
+	post := getPostFromContext(r) // post received from context not by querying database
 
+	app.store.Posts.
+
+	if err := writeJSON(w, http.StatusOK, post); err != nil {
+		app.internalServerError(w, r, err)
+
+	}
 }
 
 func (app *application) postsContextMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		idParam := chi.URLParam(r, "postId")
 		id, err := strconv.ParseInt(idParam, 10, 64)
 		if err != nil {
 			app.internalServerError(w, r, err)
@@ -149,7 +156,7 @@ func (app *application) postsContextMiddleware(next http.Handler) http.Handler {
 			return
 		}
 
-		ctx = context.WithValue(ctx, "post", post)
+		ctx = context.WithValue(ctx, postCtx, post)
 
 		/*
 									context.WithValue:
@@ -209,6 +216,6 @@ func (app *application) postsContextMiddleware(next http.Handler) http.Handler {
 }
 
 func getPostFromContext(r *http.Request) *store.Post {
-	post, _ := r.Context().Value("post").(*store.Post)
+	post, _ := r.Context().Value(postCtx).(*store.Post)
 	return post
 }
