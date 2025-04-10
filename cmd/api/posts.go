@@ -26,14 +26,14 @@ func (app *application) createPostHandler(w http.ResponseWriter, r *http.Request
 	if err := readJSON(w, r, &payload); err != nil {
 
 		/*
-         note:-
+			         note:-
 
-		In the createPostHandler function, the payload of type CreatePostPayload
-		gets its values assigned from the HTTP request body provided by the user.
-		This is done using the readJSON function, which parses the JSON payload
-		from the request body into the payload struct.
+					In the createPostHandler function, the payload of type CreatePostPayload
+					gets its values assigned from the HTTP request body provided by the user.
+					This is done using the readJSON function, which parses the JSON payload
+					from the request body into the payload struct.
 
-		 */
+		*/
 
 		app.badRequestResponse(w, r, err)
 		return
@@ -124,10 +124,138 @@ func (app *application) deletePostHandler(w http.ResponseWriter, r *http.Request
 
 }
 
+type UpdatePostPayload struct {
+	Title   *string `json:"title" validate:"omitempty,max=100"`
+	Content *string `json:"content" validate:"omitempty,max=1000"`
+}
+
 func (app *application) updatePostHandler(w http.ResponseWriter, r *http.Request) {
 	post := getPostFromContext(r) // post received from context not by querying database
 
-	app.store.Posts.
+	var payload UpdatePostPayload
+	if err := readJSON(w, r, &payload); err != nil {
+		app.badRequestResponse(w, r, err)
+	}
+
+	if err := Validate.Struct(payload); err != nil {
+		app.badRequestResponse(w, r, err)
+		return
+	}
+
+	if payload.Content != nil {
+		post.Content = *payload.Content
+	}
+	if payload.Title != nil {
+		post.Title = *payload.Title
+	}
+
+	/*
+
+				IMP NOTE:-
+				In `UpdatePostPayload`, the fields are defined as pointers (e.g., `*string`) so that you can tell the difference between:
+
+				1. **Field not provided by the user**:
+				   - If the user doesn't include a field in their request, its value will be `nil`.
+				   - This means the user doesn't want to update that field.
+
+				2. **Field provided but empty**:
+				   - If the user includes a field but leaves it empty (e.g., `"title": ""`), the pointer will not be `nil`. Instead, it will point to an empty string (`""`).
+				   - This means the user wants to update the field and set it to an empty value.
+
+				### Why is this important?
+				When updating a post, you need to know whether:
+				- The user wants to **skip updating a field** (leave it as it is).
+				- The user wants to **update a field and set it to an empty value**.
+
+				Using pointers helps you handle this distinction.
+
+				### Example:
+				#### Request 1: User skips the `title` field
+				```json
+				{
+				  "content": "Updated content"
+				}
+				```
+				- `payload.Title` will be `nil` (not provided).
+				- You won't update the `title` field in the database.
+
+				#### Request 2: User provides an empty `title`
+				```json
+				{
+				  "title": "",
+				  "content": "Updated content"
+				}
+				```
+				- `payload.Title` will point to `""` (empty string).
+				- You will update the `title` field in the database and set it to an empty value.
+
+				This flexibility is why pointers are used in `UpdatePostPayload`.
+
+
+
+
+			************************************* what if pointer is not used  **********************************************************
+
+
+				If you don't use pointers for fields in the `UpdatePostPayload` struct, you won't be able to differentiate between a field that is **not provided**
+		        in the request and a field that is **provided with an empty value**. Here's what would happen:
+
+				### Without Pointers:
+				```go
+				type UpdatePostPayload struct {
+				    Title   string `json:"title" validate:"omitempty,max=100"`
+				    Content string `json:"content" validate:"omitempty,max=1000"`
+				}
+				```
+
+				1. **Default Values**:
+				   - If a field is not provided in the JSON request, it will be assigned the default value for its type:
+				     - For `string`, the default value is an empty string (`""`).
+				   - This makes it impossible to know whether the user explicitly set the field to an empty value or simply omitted it.
+
+				2. **Behavior**:
+				   - If the user sends a request like this:
+				     ```json
+				     {
+				       "title": "New Title"
+				     }
+				     ```
+				     - `payload.Content` will be an empty string (`""`), even though the user didn't provide it.
+				     - This would overwrite the `Content` field in the database with an empty value, which is likely not the intended behavior.
+
+				3. **No Partial Updates**:
+				   - Without pointers, you cannot perform partial updates because you cannot distinguish between "no update" and "update to an empty value."
+
+				### With Pointers:
+				Using pointers allows you to check for `nil` to determine if a field was provided in the request. If a field is `nil`, you can skip updating it.
+
+				### Example Comparison:
+				#### Without Pointers:
+				```go
+				if payload.Content != "" {
+				    post.Content = payload.Content
+				}
+				```
+				- This will always update `post.Content` to an empty string if the user doesn't provide the `content` field.
+
+				#### With Pointers:
+				```go
+				if payload.Content != nil {
+				    post.Content = *payload.Content
+				}
+				```
+				- This will only update `post.Content` if the user explicitly provides the `content` field in the request.
+
+				### Conclusion:
+				Using pointers is essential for handling partial updates correctly. Without them, you lose the ability to distinguish between "field not provided" and "field provided with an empty value," which can lead to unintended overwrites.
+
+
+	*/
+
+	if err := app.store.Posts.Update(r.Context(), post); err != nil {
+		app.internalServerError(w, r, err)
+		return
+	}
 
 	if err := writeJSON(w, http.StatusOK, post); err != nil {
 		app.internalServerError(w, r, err)
