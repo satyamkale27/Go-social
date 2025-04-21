@@ -21,7 +21,7 @@ type Storage struct {
 		Delete(context.Context, int64) error
 		Update(context.Context, *Post) error
 	}
-	users interface {
+	Users interface {
 		Create(context.Context, *User) error
 	}
 	Comments interface {
@@ -32,7 +32,7 @@ type Storage struct {
 func NewStorage(db *sql.DB) Storage {
 	return Storage{
 		Posts:    &PostStore{db},
-		users:    &UserStore{db},
+		Users:    &UserStore{db},
 		Comments: &comentStore{db},
 	}
 }
