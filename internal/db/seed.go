@@ -159,8 +159,8 @@ func generateUsers(num int) []*store2.User {
 
 		users[i] = &store2.User{
 			Username: usernames[i%len(usernames)] + fmt.Sprintf("%d", i),
-			Email:    usernames[i%len(usernames)] + fmt.Sprintf("%d", i) + "@example.com",
 			Password: "123123",
+			Email:    usernames[i%len(usernames)] + fmt.Sprintf("%d", i) + "@example.com",
 		}
 
 	}
@@ -174,9 +174,10 @@ func generatePosts(num int, users []*store2.User) []*store2.Post {
 		user := users[rand.Intn(len(users))] // selects a random user
 
 		posts[i] = &store2.Post{
-			UserID:  user.Id,
-			Title:   postTitles[rand.Intn(len(postTitles))],
+
 			Content: postContents[rand.Intn(len(postContents))],
+			Title:   postTitles[rand.Intn(len(postTitles))],
+			UserID:  user.Id,
 			Tags: []string{
 				postTags[rand.Intn(len(postTags))],
 				postTags[rand.Intn(len(postTags))],
