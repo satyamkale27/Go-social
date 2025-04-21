@@ -60,8 +60,20 @@ func (s *comentStore) GetByPostID(ctx context.Context, postID int64) ([]Comment,
 }
 
 /*
-Yes, that's correct. []Comment{} is a slice of Comment structs.
+ []Comment{} is a slice of Comment structs.
 It can hold multiple Comment structs,
 allowing you to store and manage a collection of comments in a single variable.
 Each element in the slice is of type Comment.
 */
+
+func (s *comentStore) Create(ctx context.Context, comment *Comment) error {
+	query := `INSERT INTO comments (post_id, user_id, content) VALUES ($1, $2, $3) RETURNING id,created_at`
+	ctx, cancel := context.WithTimeout(ctx, QueryTimeOutDuration)
+	defer cancel()
+
+	err := s.db.QueryRowContext(ctx, query, comment.PostID, comment.UserID, comment.Content).Scan(&comment.ID, &comment.CreatedAt)
+	if err != nil {
+		return err
+	}
+	return nil
+}
