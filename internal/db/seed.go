@@ -141,7 +141,7 @@ func Seed(store store2.Storage) {
 		}
 	}
 
-	return
+	log.Println("seeding complete")
 }
 
 func generateUsers(num int) []*store2.User {
@@ -198,4 +198,5 @@ func generateComments(num int, users []*store2.User, posts []*store2.Post) []*st
 			Content: postContents[rand.Intn(len(postContents))],
 		}
 	}
+	return comments
 }
