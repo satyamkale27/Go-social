@@ -27,7 +27,7 @@ func (app *application) getUserHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 type FollowUser struct {
-	userID int64 `json:"user_id"`
+	UserId int64 `json:"user_id"`
 }
 
 func (app *application) followUserHandler(w http.ResponseWriter, r *http.Request) {
@@ -40,7 +40,7 @@ func (app *application) followUserHandler(w http.ResponseWriter, r *http.Request
 		return
 	}
 	ctx := r.Context()
-	if err := app.store.Followers.Follow(ctx, followerUser.Id, payload.userID); err != nil {
+	if err := app.store.Followers.Follow(ctx, followerUser.Id, payload.UserId); err != nil {
 		app.internalServerError(w, r, err)
 		return
 	}
@@ -60,7 +60,7 @@ func (app *application) unfollowUserHandler(w http.ResponseWriter, r *http.Reque
 		return
 	}
 	ctx := r.Context()
-	if err := app.store.Followers.Unfollow(ctx, UnfollowedUser.Id, payload.userID); err != nil {
+	if err := app.store.Followers.Unfollow(ctx, UnfollowedUser.Id, payload.UserId); err != nil {
 		app.internalServerError(w, r, err)
 		return
 	}
