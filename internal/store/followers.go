@@ -29,7 +29,7 @@ func (s *FollowerStore) Follow(ctx context.Context, followerId, userId int64) er
 	return nil
 }
 
-func (s *FollowerStore) UnFollow(ctx context.Context, followerId, userId int64) error {
+func (s *FollowerStore) Unfollow(ctx context.Context, followerId, userId int64) error {
 
 	query := `DELETE FROM followers WHERE user_id = $1 AND follower_id = $2`
 
