@@ -19,7 +19,7 @@ type CreateUserPayload struct {
 }
 
 func (app *application) getUserHandler(w http.ResponseWriter, r *http.Request) {
-	user := getPostFromContext(r)
+	user := getUserFromContext(r)
 
 	if err := app.jsonResponse(w, http.StatusOK, user); err != nil {
 		app.internalServerError(w, r, err)
@@ -32,15 +32,18 @@ type FollowUser struct {
 
 func (app *application) followUserHandler(w http.ResponseWriter, r *http.Request) {
 
-	followerUser := getPostFromContext(r)
+	followerUser := getUserFromContext(r)
 
 	var payload FollowUser
 	if err := readJSON(w, r, &payload); err != nil {
 		app.badRequestResponse(w, r, err)
 		return
 	}
-	ctx := r.Context().Value
-	app.store.Users.follow(ctx, followerUser.Id, payload.userID)
+	ctx := r.Context()
+	if err := app.store.Followers.Follow(ctx, followerUser.Id, payload.userID); err != nil {
+		app.internalServerError(w, r, err)
+		return
+	}
 	if err := app.jsonResponse(w, http.StatusNoContent, nil); err != nil {
 		app.internalServerError(w, r, err)
 	}
@@ -49,7 +52,18 @@ func (app *application) followUserHandler(w http.ResponseWriter, r *http.Request
 
 func (app *application) unfollowUserHandler(w http.ResponseWriter, r *http.Request) {
 
-	user := getPostFromContext(r)
+	UnfollowedUser := getUserFromContext(r)
+
+	var payload FollowUser
+	if err := readJSON(w, r, &payload); err != nil {
+		app.badRequestResponse(w, r, err)
+		return
+	}
+	ctx := r.Context()
+	if err := app.store.Followers.Unfollow(ctx, UnfollowedUser.Id, payload.userID); err != nil {
+		app.internalServerError(w, r, err)
+		return
+	}
 	if err := app.jsonResponse(w, http.StatusNoContent, nil); err != nil {
 		app.internalServerError(w, r, err)
 	}
@@ -82,7 +96,7 @@ func (app *application) userContextMiddleware(next http.Handler) http.Handler {
 	})
 }
 
-func (app *application) getUserFromContext(r *http.Request) store.User {
-	user, _ := r.Context().Value(userCtx).(store.User)
+func getUserFromContext(r *http.Request) *store.User {
+	user, _ := r.Context().Value(userCtx).(*store.User)
 	return user
 }
