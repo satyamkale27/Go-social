@@ -29,7 +29,7 @@ type PostStore struct {
 	db *sql.DB
 }
 
-func (s *PostStore) GetUserFeed(ctx context.Context, userid int64) ([]PostWithMetaData, error) {
+func (s *PostStore) GetUserFeed(ctx context.Context, userid int64, fq PaginatedFeedQuery) ([]PostWithMetaData, error) {
 	query := `
 SELECT
     p.id,
@@ -54,12 +54,13 @@ WHERE
 GROUP BY 
     p.id, u.username
 ORDER BY 
-    p.created_at DESC;
+    p.created_at ` + fq.Sort + `
+LIMIT $2 OFFSET $3;
 `
 
 	ctx, cancel := context.WithTimeout(ctx, QueryTimeOutDuration)
 	defer cancel()
-	rows, err := s.db.QueryContext(ctx, query, userid)
+	rows, err := s.db.QueryContext(ctx, query, userid, fq.Limit, fq.Offset)
 	if err != nil {
 		return nil, err
 	}
