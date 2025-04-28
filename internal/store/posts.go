@@ -52,6 +52,7 @@ JOIN
 WHERE 
     f.user_id = $1  AND
     (p.title ILIKE '%' || $4 || '%' OR p.content ILIKE '%' || $4 || '%' ) 
+    (p.tags @> $5 OR $5 = '{}'  )
 GROUP BY 
     p.id, u.username
 ORDER BY 
@@ -61,7 +62,7 @@ LIMIT $2 OFFSET $3;
 
 	ctx, cancel := context.WithTimeout(ctx, QueryTimeOutDuration)
 	defer cancel()
-	rows, err := s.db.QueryContext(ctx, query, userid, fq.Limit, fq.Offset, fq.Search)
+	rows, err := s.db.QueryContext(ctx, query, userid, fq.Limit, fq.Offset, fq.Search, pq.Array(fq.Tags))
 	if err != nil {
 		return nil, err
 	}
