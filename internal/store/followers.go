@@ -28,6 +28,7 @@ func (s *FollowerStore) Follow(ctx context.Context, followerId, userId int64) er
 		if pqErr, ok := err.(*pq.Error); ok && pqErr.Code == "23505" {
 			return ErrConflict
 		}
+		return err
 	}
 	return nil
 }
