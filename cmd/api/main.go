@@ -5,7 +5,6 @@ import (
 	"github.com/satyamkale27/Go-social.git/internal/env"
 	store2 "github.com/satyamkale27/Go-social.git/internal/store"
 	"go.uber.org/zap"
-	"log"
 	"os"
 )
 
@@ -37,7 +36,7 @@ func main() {
 	}
 
 	defer db.Close()
-	log.Println("Database connection pool established")
+	logger.Info("Database connection pool established")
 
 	store := store2.NewStorage(db)
 
