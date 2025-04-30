@@ -4,6 +4,7 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	store2 "github.com/satyamkale27/Go-social.git/internal/store"
+	"go.uber.org/zap"
 	"log"
 	"net/http"
 	"time"
@@ -12,6 +13,7 @@ import (
 type application struct {
 	config config
 	store  store2.Storage
+	logger *zap.SugaredLogger
 }
 
 type config struct {

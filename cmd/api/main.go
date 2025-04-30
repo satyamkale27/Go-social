@@ -4,6 +4,7 @@ import (
 	db2 "github.com/satyamkale27/Go-social.git/internal/db"
 	"github.com/satyamkale27/Go-social.git/internal/env"
 	store2 "github.com/satyamkale27/Go-social.git/internal/store"
+	"go.uber.org/zap"
 	"log"
 	"os"
 )
@@ -22,6 +23,9 @@ func main() {
 		env: env.GetString("ENV", "development"),
 	}
 
+	logger := zap.Must(zap.NewDevelopment()).Sugar()
+	defer logger.Sync()
+
 	db, err := db2.New(
 		cfg.db.addr,
 		cfg.db.maxOpenConns,
@@ -29,7 +33,7 @@ func main() {
 		cfg.db.maxIdleTime,
 	)
 	if err != nil {
-		log.Panic(err)
+		logger.Fatal(err)
 	}
 
 	defer db.Close()
@@ -40,11 +44,12 @@ func main() {
 	app := &application{
 		config: cfg,
 		store:  store,
+		logger: logger,
 	}
 	os.LookupEnv("PATH")
 
 	mux := app.mount()
-	log.Fatal(app.run(mux))
+	logger.Fatal(app.run(mux))
 
 	/*
 		When you call app.run(),
