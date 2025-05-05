@@ -47,7 +47,7 @@ func (s *UserStore) Create(ctx context.Context, tx *sql.Tx, user *User) error {
 	ctx, cancel := context.WithTimeout(ctx, QueryTimeOutDuration)
 	defer cancel()
 
-	err := s.db.QueryRowContext(ctx, query, user.Username, user.Password, user.Email).Scan(&user.Id, &user.CreatedAt)
+	err := s.db.QueryRowContext(ctx, query, user.Username, user.Password.hash, user.Email).Scan(&user.Id, &user.CreatedAt)
 
 	if err != nil {
 		switch {
