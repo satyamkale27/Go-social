@@ -6,6 +6,7 @@ import (
 	store2 "github.com/satyamkale27/Go-social.git/internal/store"
 	"go.uber.org/zap"
 	"os"
+	"time"
 )
 
 const version = "0.0.1"
@@ -20,6 +21,9 @@ func main() {
 			maxIdleTime:  env.GetString("MAX_IDLE_TIME", "15m"),
 		},
 		env: env.GetString("ENV", "development"),
+		mail: mailConfig{
+			exp: time.Hour * 24 * 3, // 3 days
+		},
 	}
 
 	logger := zap.Must(zap.NewDevelopment()).Sugar()

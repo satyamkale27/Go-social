@@ -1,6 +1,9 @@
 package main
 
 import (
+	"crypto/sha256"
+	"encoding/hex"
+	"github.com/google/uuid"
 	"github.com/satyamkale27/Go-social.git/internal/store"
 	"net/http"
 )
@@ -33,9 +36,22 @@ func (app *application) registerUserHandler(w http.ResponseWriter, r *http.Reque
 	}
 
 	ctx := r.Context()
-	err := app.store.Users.CreateAndInvite(ctx, user, "uuidv4", app.config.mail.exp)
+	plainToken := uuid.New().String()
+	hash := sha256.Sum256([]byte(plainToken)) // encrypting the token
+	hashToken := hex.EncodeToString(hash[:])
+
+	err := app.store.Users.CreateAndInvite(ctx, user, hashToken, app.config.mail.exp)
 	if err != nil {
-		
+		switch err {
+		case store.ErrDuplicateUsername:
+			app.badRequestResponse(w, r, err)
+		case store.ErrDuplicateEmail:
+			app.badRequestResponse(w, r, err)
+		default:
+			app.internalServerError(w, r, err)
+
+		}
+		return
 	}
 
 	if err := app.jsonResponse(w, http.StatusOK, nil); err != nil {
