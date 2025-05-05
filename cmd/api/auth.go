@@ -17,7 +17,7 @@ type RegisterUserPayload struct {
 func (app *application) registerUserHandler(w http.ResponseWriter, r *http.Request) {
 
 	var payload RegisterUserPayload
-	if err := readJSON(w, r, payload); err != nil {
+	if err := readJSON(w, r, &payload); err != nil {
 		app.badRequestResponse(w, r, err)
 		return
 	}

@@ -2,6 +2,7 @@ package db
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
 	store2 "github.com/satyamkale27/Go-social.git/internal/store"
 	"log"
@@ -111,18 +112,22 @@ var postComments = []string{
 	"Thanks for the Docker guide — deployed my first Go app!",
 }
 
-func Seed(store store2.Storage) {
+func Seed(store store2.Storage, db *sql.DB) {
 	ctx := context.Background()
 	users := generateUsers(100)
+	tx, _ := db.BeginTx(ctx, nil)
 
 	for _, user := range users {
 
-		if err := store.Users.Create(ctx, user); err != nil {
+		if err := store.Users.Create(ctx, tx, user); err != nil {
+			_ = tx.Rollback()
 			log.Println("Error creating user", user, err)
 			return
 		}
 
 	}
+
+	tx.Commit()
 
 	posts := generatePosts(200, users)
 
@@ -159,7 +164,6 @@ func generateUsers(num int) []*store2.User {
 
 		users[i] = &store2.User{
 			Username: usernames[i%len(usernames)] + fmt.Sprintf("%d", i),
-			Password: "123123",
 			Email:    usernames[i%len(usernames)] + fmt.Sprintf("%d", i) + "@example.com",
 		}
 
