@@ -157,7 +157,6 @@ func (s *UserStore) getUserFromInvitation(ctx context.Context, tx *sql.Tx, token
 	if err != nil {
 		switch {
 		case err == sql.ErrNoRows:
-			fmt.Printf("Token not found or expired: %s\n", hashToken)
 			return nil, ErrNotFound
 		default:
 			return nil, err
