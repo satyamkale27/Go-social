@@ -6,6 +6,7 @@ import (
 	"database/sql"
 	"encoding/hex"
 	"errors"
+	"fmt"
 	"golang.org/x/crypto/bcrypt"
 	"time"
 )
@@ -117,7 +118,7 @@ func (s *UserStore) createUserninvitation(ctx context.Context, tx *sql.Tx, token
 }
 
 func (s *UserStore) Activate(ctx context.Context, token string) error {
-	// 1 find the user that this tocken belongs to
+	// 1 find the user that this token belongs to
 	// 2 update the user state(Active state)
 	// 3 clean the invitations
 	// so we need to run all the methods database operations, every operations has to be success so we use transactions
@@ -156,6 +157,7 @@ func (s *UserStore) getUserFromInvitation(ctx context.Context, tx *sql.Tx, token
 	if err != nil {
 		switch {
 		case err == sql.ErrNoRows:
+			fmt.Printf("Token not found or expired: %s\n", hashToken)
 			return nil, ErrNotFound
 		default:
 			return nil, err
