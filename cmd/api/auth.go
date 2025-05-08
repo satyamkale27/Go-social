@@ -84,7 +84,6 @@ func (app *application) registerUserHandler(w http.ResponseWriter, r *http.Reque
 		// rollback user creation if email (fails SAGA pattern)
 		if err := app.store.Users.Delete(ctx, user.Id); err != nil {
 			app.logger.Errorw("error deleting user", "error", err)
-			app.internalServerError(w, r, err)
 		}
 		app.internalServerError(w, r, err)
 		return

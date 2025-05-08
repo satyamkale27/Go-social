@@ -17,6 +17,13 @@ type SendGridMailer struct {
 }
 
 func NewSendgrid(apiKey, fromEmail string) *SendGridMailer {
+
+	if fromEmail == "" {
+		fmt.Println("Warning: fromEmail is empty. Ensure the FROM_EMAIL environment variable is set.")
+	} else {
+		fmt.Printf("fromEmail: %s\n", fromEmail)
+	}
+
 	client := sendgrid.NewSendClient(apiKey)
 	return &SendGridMailer{
 		fromEmail: fromEmail,

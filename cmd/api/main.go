@@ -23,7 +23,7 @@ func main() {
 			maxIdleConns: env.GetInt("MAX_IDLE_CONNS", 30),
 			maxIdleTime:  env.GetString("MAX_IDLE_TIME", "15m"),
 		},
-		env: env.GetString("ENV", "development"),
+		env: env.GetString("ENV", ""),
 		mail: mailConfig{
 			fromEmail: env.GetString("FROM_EMAIL", ""),
 			exp:       time.Hour * 24 * 3, // 3 days
