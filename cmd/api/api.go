@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
+	"github.com/satyamkale27/Go-social.git/internal/mailer"
 	store2 "github.com/satyamkale27/Go-social.git/internal/store"
 	"go.uber.org/zap"
 	"net/http"
@@ -13,6 +14,7 @@ type application struct {
 	config config
 	store  store2.Storage
 	logger *zap.SugaredLogger
+	mailer mailer.Client
 }
 
 type config struct {

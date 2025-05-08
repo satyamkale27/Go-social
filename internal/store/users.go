@@ -6,7 +6,6 @@ import (
 	"database/sql"
 	"encoding/hex"
 	"errors"
-	"fmt"
 	"golang.org/x/crypto/bcrypt"
 	"time"
 )
