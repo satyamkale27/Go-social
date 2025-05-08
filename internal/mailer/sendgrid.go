@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/sendgrid/sendgrid-go"
 	"github.com/sendgrid/sendgrid-go/helpers/mail"
+	"html/template"
 	"log"
 	"time"
 )
@@ -24,13 +25,57 @@ func NewSendgrid(apiKey, fromEmail string) *SendGridMailer {
 	}
 }
 
-func (m *SendGridMailer) send(templateFile, username, email string, data any, isSandbox bool) error {
+func (m *SendGridMailer) Send(templateFile, username, email string, data any, isSandbox bool) error {
 
 	from := mail.NewEmail(FromName, m.fromEmail)
 	to := mail.NewEmail(username, email)
 
+	// template parse
+
+	tmpl, err := template.ParseFS(FS, "template/"+templateFile)
+	/*
+		note:-
+
+			The template.ParseFS function parses the plain text
+			content into a *template.Template object.
+			This object is used to render the template
+			by replacing placeholders (e.g., {{.Username}}) with actual data.
+
+			Yes, the embedded content is accessed from the binary.
+			When you use the embed package, the specified files
+			(e.g., templates) are embedded into the compiled binary
+			during the build process. At runtime, the embed.FS provides
+			a virtual file system interface to access this content.
+	*/
+	if err != nil {
+		return err
+	}
+
 	subject := new(bytes.Buffer)
+	/*
+		note:-
+			Template Execution: It executes the "subject" section of the parsed template
+			(tmpl), which is defined in the user_invitation.tmpl file as:
+
+
+			{{define "subject"}}Finish Registration with GoSocial{{end}}
+			Data Binding: The data parameter is passed to the template.
+			If the template contains placeholders (e.g., {{.Username}}), they are replaced with corresponding values from data.
+
+
+			Output to Buffer: The rendered output (in this case, "Finish Registration with GoSocial")
+			is written to the subject buffer, which is a bytes.Buffer.
+	*/
+	err = tmpl.ExecuteTemplate(subject, "subject", data)
+	if err != nil {
+		return err
+	}
 	body := new(bytes.Buffer)
+	err = tmpl.ExecuteTemplate(body, "body", data)
+	if err != nil {
+		return err
+	}
+
 	message := mail.NewSingleEmail(from, subject.String(), to, "", body.String())
 
 	message.SetMailSettings(&mail.MailSettings{

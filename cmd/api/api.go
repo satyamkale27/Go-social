@@ -18,15 +18,22 @@ type application struct {
 }
 
 type config struct {
-	addr   string
-	db     dbConfig
-	env    string
-	apiURL string
-	mail   mailConfig
+	addr        string
+	db          dbConfig
+	env         string
+	apiURL      string
+	mail        mailConfig
+	frontendUrl string
 }
 
 type mailConfig struct {
-	exp time.Duration
+	sendGrid  sendgridConfig
+	fromEmail string
+	exp       time.Duration
+}
+
+type sendgridConfig struct {
+	apiKey string
 }
 
 type dbConfig struct {
