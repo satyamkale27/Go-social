@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
+	"github.com/go-chi/cors"
 	"github.com/satyamkale27/Go-social.git/internal/mailer"
 	store2 "github.com/satyamkale27/Go-social.git/internal/store"
 	"go.uber.org/zap"
@@ -45,6 +46,17 @@ type dbConfig struct {
 
 func (app *application) mount() http.Handler {
 	r := chi.NewRouter()
+
+	r.Use(cors.Handler(cors.Options{
+		// cors allowed
+		AllowedOrigins:   []string{"https://*", "http://*"},
+		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type", "X-CSRF-Token"},
+		ExposedHeaders:   []string{"Link"},
+		AllowCredentials: false,
+		MaxAge:           300,
+	}))
+
 	r.Use(middleware.RequestID)
 	r.Use(middleware.RealIP)
 	r.Use(middleware.Logger) // logs the request data
