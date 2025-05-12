@@ -19,5 +19,5 @@ The template remains in its original text format and is parsed and executed at r
 var FS embed.FS
 
 type Client interface {
-	Send(templateFile, username, email string, data any, isSandbox bool) error
+	Send(templateFile, username, email string, data any, isSandbox bool) (int, error)
 }
