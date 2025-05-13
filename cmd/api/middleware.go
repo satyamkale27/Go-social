@@ -14,28 +14,55 @@ func (app *application) BasicAuthMiddleware() func(http.Handler) http.Handler {
 			authHeader := r.Header.Get("Authorization")
 			if authHeader == "" {
 
-				app.unauthorizedErrorResponse(w, r, fmt.Errorf("authorization header is missing"))
+				app.unauthorizedBasicErrorResponse(w, r, fmt.Errorf("authorization header is missing"))
 				return
 			}
 
 			parts := strings.Split(authHeader, " ")
 			if len(parts) != 2 || parts[0] != "Basic" {
-				app.unauthorizedErrorResponse(w, r, fmt.Errorf("authorization header is malformed"))
+				app.unauthorizedBasicErrorResponse(w, r, fmt.Errorf("authorization header is malformed"))
 				return
 			}
 
 			decoded, err := base64.StdEncoding.DecodeString(parts[1])
 			if err != nil {
-				app.unauthorizedErrorResponse(w, r, err)
+				app.unauthorizedBasicErrorResponse(w, r, err)
 				return
 			}
 
 			username := app.config.auth.basic.user
 			pass := app.config.auth.basic.pass
 
+			/*
+					note:-
+					In Go, a struct is a blueprint, and when you assign values to it, you create an instance of that struct.
+
+					Explanation:
+					Struct Definition: A struct is just a type definition (blueprint) and does not hold any data until an instance is created.
+
+
+					type basicConfig struct {
+					    user string
+					    pass string
+					}
+					Instance of Struct: When you assign values to a struct (e.g., via a variable or field), you create an instance of it. For example:
+
+					basic := basicConfig{user: "admin", pass: "password"}
+					Accessing Fields: When you access app.config.auth.basic.user, you are accessing
+				    the user field of an instance of the basicConfig struct.
+				    This instance is part of the authConfig struct, which is part of the config
+				    struct, and so on.
+
+
+					How to Know if You Are Pointing to a Struct or an Instance:
+					If you are accessing fields (e.g., app.config.auth.basic.user), you are working with an instance of the struct.
+					If you are referring to the struct type itself (e.g., basicConfig), you are referring to the struct definition (blueprint).
+
+			*/
+
 			cred := strings.SplitN(string(decoded), ":", 2)
 			if len(cred) != 2 || cred[0] != username || cred[1] != pass {
-				app.unauthorizedErrorResponse(w, r, fmt.Errorf("invalid credentials"))
+				app.unauthorizedBasicErrorResponse(w, r, fmt.Errorf("invalid credentials"))
 				return
 			}
 

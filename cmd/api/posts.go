@@ -26,12 +26,15 @@ func (app *application) createPostHandler(w http.ResponseWriter, r *http.Request
 	if err := readJSON(w, r, &payload); err != nil {
 
 		/*
-			         note:-
+				         note:-
 
-					In the createPostHandler function, the payload of type CreatePostPayload
-					gets its values assigned from the HTTP request body provided by the user.
-					This is done using the readJSON function, which parses the JSON payload
-					from the request body into the payload struct.
+						the readJSON function is used in the createPostHandler
+			            to parse the JSON payload from the HTTP request body into the CreatePostPayload
+			            struct. This allows the application to extract and validate the data provided by
+			            the user in the request.
+			            The readJSON function decodes the JSON payload into the struct and ensures that the
+			            data matches the expected structure. If the JSON is invalid or contains unexpected
+			            fields, it returns an error, which is then handled by the badRequestResponse function.
 
 		*/
 

@@ -30,6 +30,21 @@ func (app *application) notFoundResponse(w http.ResponseWriter, r *http.Request,
 
 func (app *application) unauthorizedErrorResponse(w http.ResponseWriter, r *http.Request, err error) {
 	app.logger.Warnf("unauthorized error", "method", r.Method, "path", r.URL.Path, "error", err.Error())
-	writeJSONError(w, http.StatusNotFound, "unauthorized")
+	writeJSONError(w, http.StatusUnauthorized, "unauthorized")
+
+}
+
+func (app *application) unauthorizedBasicErrorResponse(w http.ResponseWriter, r *http.Request, err error) {
+	app.logger.Warnf("unauthorized basic error", "method", r.Method, "path", r.URL.Path, "error", err.Error())
+	w.Header().Set("www-authenticate", `Basic realm="restricted, charset=UTF-8"`)
+
+	/*
+		The line of code that caused the browser's login prompt box is:
+		w.Header().Set("www-authenticate", `Basic realm="restricted, charset=UTF-8"`)
+		This is located in the unauthorizedBasicErrorResponse function in the file cmd/api/errors.go.
+		It sets the WWW-Authenticate header, which instructs the browser to display the login prompt
+		when a 401 Unauthorized response is sent.
+	*/
+	writeJSONError(w, http.StatusUnauthorized, "unauthorized")
 
 }

@@ -75,7 +75,7 @@ func (app *application) mount() http.Handler {
 	r.Use(middleware.Timeout(60 * time.Second))
 
 	r.Route("/v1", func(r chi.Router) {
-		r.Get("/health", app.healthcheckHandler)
+		r.With(app.BasicAuthMiddleware()).Get("/health", app.healthcheckHandler)
 		r.Route("/posts", func(r chi.Router) {
 			r.Post("/", app.createPostHandler)
 			r.Route("/{postId}", func(r chi.Router) {
