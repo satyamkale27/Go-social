@@ -25,6 +25,16 @@ type config struct {
 	apiURL      string
 	mail        mailConfig
 	frontendUrl string
+	auth        authConfig
+}
+
+type authConfig struct {
+	basic basicConfig
+}
+
+type basicConfig struct {
+	user string
+	pass string
 }
 
 type mailConfig struct {
