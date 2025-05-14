@@ -4,6 +4,7 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/cors"
+	"github.com/satyamkale27/Go-social.git/internal/auth"
 	"github.com/satyamkale27/Go-social.git/internal/mailer"
 	store2 "github.com/satyamkale27/Go-social.git/internal/store"
 	"go.uber.org/zap"
@@ -12,10 +13,11 @@ import (
 )
 
 type application struct {
-	config config
-	store  store2.Storage
-	logger *zap.SugaredLogger
-	mailer mailer.Client
+	config        config
+	store         store2.Storage
+	logger        *zap.SugaredLogger
+	mailer        mailer.Client
+	authenticator auth.Authenticator // custom made package by me not in built
 }
 
 type config struct {
@@ -30,6 +32,12 @@ type config struct {
 
 type authConfig struct {
 	basic basicConfig
+	token tokenConfig
+}
+type tokenConfig struct {
+	secret string
+	expiry time.Duration
+	iss    string
 }
 
 type basicConfig struct {
@@ -104,6 +112,7 @@ func (app *application) mount() http.Handler {
 		// public route
 		r.Route("/authentication", func(r chi.Router) {
 			r.Post("/user", app.registerUserHandler)
+			r.Post("/token", app.createTokenHandler)
 		})
 
 	})

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/satyamkale27/Go-social.git/internal/auth"
 	db2 "github.com/satyamkale27/Go-social.git/internal/db"
 	"github.com/satyamkale27/Go-social.git/internal/env"
 	mailer2 "github.com/satyamkale27/Go-social.git/internal/mailer"
@@ -37,6 +38,11 @@ func main() {
 				user: env.GetString("BASIC_AUTH_USER", "admin"),
 				pass: env.GetString("BASIC_AUTH_PASS", "admin"),
 			},
+			token: tokenConfig{
+				secret: env.GetString("TOKEN_SECRET", "example"),
+				expiry: time.Hour * 24 * 3, // 3 days
+				iss:    "gosocial",
+			},
 		},
 	}
 
@@ -60,11 +66,14 @@ func main() {
 
 	mailer := mailer2.NewSendgrid(cfg.mail.sendGrid.apiKey, cfg.mail.fromEmail)
 
+	jwtAuthenticator := auth.NewJWTAuthenticator(cfg.auth.token.secret, cfg.auth.token.iss, cfg.auth.token.iss)
+
 	app := &application{
-		config: cfg,
-		store:  store,
-		logger: logger,
-		mailer: mailer,
+		config:        cfg,
+		store:         store,
+		logger:        logger,
+		mailer:        mailer,
+		authenticator: jwtAuthenticator,
 	}
 	os.LookupEnv("PATH")
 
