@@ -51,7 +51,7 @@ JOIN
     followers f ON f.follower_id = p.user_id OR p.user_id = $1
 WHERE 
     f.user_id = $1  AND
-    (p.title ILIKE '%' || $4 || '%' OR p.content ILIKE '%' || $4 || '%' ) 
+    (p.title ILIKE '%' || $4 || '%' OR p.content ILIKE '%' || $4 || '%' ) AND 
     (p.tags @> $5 OR $5 = '{}'  )
 GROUP BY 
     p.id, u.username
