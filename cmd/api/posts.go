@@ -22,6 +22,7 @@ type CreatePostPayload struct {
 }
 
 func (app *application) createPostHandler(w http.ResponseWriter, r *http.Request) {
+
 	var payload CreatePostPayload
 	if err := readJSON(w, r, &payload); err != nil {
 
@@ -52,11 +53,13 @@ func (app *application) createPostHandler(w http.ResponseWriter, r *http.Request
 		return
 	}
 
+	user := getUserFromContext(r) // get the user that is currently authenticated
+
 	post := &store.Post{
 		Title:   payload.Title,
 		Content: payload.Content,
 		Tags:    payload.Tags,
-		UserID:  1,
+		UserID:  user.Id,
 	}
 	ctx := r.Context()
 
