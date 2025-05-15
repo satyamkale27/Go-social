@@ -1,0 +1,1 @@
+ALTER TABLE IF EXISTS users DROP COLOUMN role_id;
