@@ -97,11 +97,9 @@ func (s *PostStore) Create(ctx context.Context, post *Post) error {
 }
 
 func (s *PostStore) GetById(ctx context.Context, postId int64) (*Post, error) {
-
-	query := `SELECT id, content, title, user_id, tags, created_at, updated_at,version
-             FROM posts
-             WHERE id = $1
-             `
+	query := `SELECT p.id, p.content, p.title, p.user_id, p.tags, p.created_at, p.updated_at, p.version
+             FROM posts p
+             WHERE p.id = $1`
 	var post Post
 
 	err := s.db.QueryRowContext(ctx, query, postId).Scan(
@@ -114,7 +112,6 @@ func (s *PostStore) GetById(ctx context.Context, postId int64) (*Post, error) {
 		default:
 			return nil, err
 		}
-
 	}
 	return &post, nil
 }

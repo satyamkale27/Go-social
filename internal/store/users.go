@@ -22,6 +22,8 @@ type User struct {
 	Password  password `json:"-"`
 	CreatedAt string   `json:"created_at"`
 	IsActive  bool     `json:"is_active"`
+	RoleID    int64    `json:"role_id"`
+	Role      Role     `json:"role"`
 }
 
 type password struct {
@@ -45,12 +47,12 @@ type UserStore struct {
 
 func (s *UserStore) Create(ctx context.Context, tx *sql.Tx, user *User) error {
 	query := `
- INSERT INTO users ( username, password, email) values ($1,$2,$3) RETURNING id, created_at
+ INSERT INTO users ( username, password, email,role_id) values ($1,$2,$3,$role_id) RETURNING id, created_at
 `
 	ctx, cancel := context.WithTimeout(ctx, QueryTimeOutDuration)
 	defer cancel()
 
-	err := s.db.QueryRowContext(ctx, query, user.Username, user.Password.hash, user.Email).Scan(&user.Id, &user.CreatedAt)
+	err := s.db.QueryRowContext(ctx, query, user.Username, user.Password.hash, user.Email, user.RoleID).Scan(&user.Id, &user.CreatedAt)
 
 	if err != nil {
 		switch {
@@ -68,24 +70,24 @@ func (s *UserStore) Create(ctx context.Context, tx *sql.Tx, user *User) error {
 }
 
 func (s *UserStore) GetById(ctx context.Context, userId int64) (*User, error) {
-
-	query := `SELECT id, email, username, password,  created_at
-             FROM users
-             WHERE id = $1 and is_active = true`
+	query := `SELECT u.id, u.email, u.username, u.password, u.created_at, u.is_active, r.id AS role_id, r.name, r.description, r.level
+			  FROM users u
+			  JOIN roles r ON u.role_id = r.id
+			  WHERE u.id = $1 AND u.is_active = true`
 
 	var user User
 
 	err := s.db.QueryRowContext(ctx, query, userId).Scan(
-		&user.Id, &user.Email, &user.Username, &user.Password.hash, &user.CreatedAt,
+		&user.Id, &user.Email, &user.Username, &user.Password.hash, &user.CreatedAt, &user.IsActive,
+		&user.Role.Id, &user.Role.Name, &user.Role.Description, &user.Role.Level,
 	)
 	if err != nil {
-		switch err {
-		case sql.ErrNoRows:
+		switch {
+		case errors.Is(err, sql.ErrNoRows):
 			return nil, ErrNotFound
 		default:
 			return nil, err
 		}
-
 	}
 	return &user, nil
 }
