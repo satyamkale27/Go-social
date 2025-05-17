@@ -18,5 +18,5 @@ func main() {
 	}
 	defer conn.Close()
 	storee := store.NewStorage(conn)
-	db.Seed(storee)
+	db.Seed(storee, conn)
 }
