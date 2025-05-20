@@ -54,11 +54,7 @@
    docker-compose up -d
    ```
 
-. **Install Go Dependencies**
-
-   ```bash
-   go mod tidy
-   ```
+- **Install Go Dependencies**: Run `go mod tidy` to install and clean up dependencies.
 
 
 4. **Run Database Migrations**
