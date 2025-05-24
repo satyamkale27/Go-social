@@ -36,7 +36,7 @@
 
 2. **Set Up Environment Variables**
 
-   Create a `.env` file in the root directory and add the following:
+   Create a `.envrc` file in the root directory and add the following:
 
    ```env
    ADDR=:8080
@@ -55,21 +55,20 @@
    ```
 
 - **Install Go Dependencies**: Run `go mod tidy` to install and clean up dependencies.
+- **Run** `go install github.com/air-verse/air@latest`
 
 
 4. **Run Database Migrations**
 
    ```bash
-   cd cmd/migrate
-   go run main.go up
+   source .envrc
+   make migrate -up
    ```
 
 5. **Build and Run the Application**
 
    ```bash
-   cd ../..
    go build -o bin/main ./cmd/api
-   ./bin/main
    ```
 
 6. **Access the API**
@@ -82,7 +81,7 @@
 
 ### 🧑 Authentication
 
-- **POST** `/api/v1/users/register` – Register a new user
+- **POST** `/v1/authentication/user` – Register a new user
   ```json
   {
     "username": "example",
@@ -91,7 +90,7 @@
   }
   ```
 
-- **POST** `/api/v1/users/login` – Login and get token
+- **POST** `/v1/authentication/token` – Login and get token
   ```json
   {
     "email": "example@example.com",
@@ -101,14 +100,14 @@
 
 ### 👤 User Management
 
-- **GET** `/api/v1/users/{userId}` – Get user details
-- **POST** `/api/v1/users/{userId}/follow` – Follow a user
-- **POST** `/api/v1/users/{userId}/unfollow` – Unfollow a user
-- **GET** `/api/v1/users/activate/{token}` – Activate a user account
+- **GET** `v1/users/{userId}` – Get user details
+- **POST** `v1/users/{userId}/follow` – Follow a user
+- **POST** `v1/users/{userId}/unfollow` – Unfollow a user
+- **GET** `v1/users/activate/{token}` – Activate a user account
 
 ### 📝 Posts
 
-- **POST** `/api/v1/posts` – Create a new post
+- **POST** `v1/posts` – Create a new post
   ```json
   {
     "title": "Post Title",
@@ -117,9 +116,9 @@
   }
   ```
 
-- **GET** `/api/v1/posts/{postId}` – Get post by ID
+- **GET** `v1/posts/{postId}` – Get post by ID
 
-- **PUT** `/api/v1/posts/{postId}` – Update post
+- **PUT** `v1/posts/{postId}` – Update post
   ```json
   {
     "title": "Updated Title",
@@ -127,22 +126,22 @@
   }
   ```
 
-- **DELETE** `/api/v1/posts/{postId}` – Delete post
+- **DELETE** `v1/posts/{postId}` – Delete post
 
 ### 💬 Comments
 
-- **POST** `/api/v1/posts/{postId}/comments` – Add a comment
+- **POST** `v1/posts/{postId}/comments` – Add a comment
   ```json
   {
     "content": "This is a comment."
   }
   ```
 
-- **GET** `/api/v1/posts/{postId}/comments` – Get all comments on a post
+- **GET** `v1/posts/{postId}/comments` – Get all comments on a post
 
 ### 📰 Feed
 
-- **GET** `/api/v1/feed` – Get user feed
+- **GET** `/v1/users/feed` – Get user feed
     - Query Parameters:
         - `limit`: Number of posts to fetch (default: 20)
         - `offset`: Offset for pagination (default: 0)
