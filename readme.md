@@ -55,7 +55,8 @@
    ```
 
 - **Install Go Dependencies**: Run `go mod tidy` to install and clean up dependencies.
-- **Run** `go install github.com/air-verse/air@latest`
+- **Run** `go install github.com/air-verse/air@latest` for live reloading(optional)
+- **Run** `go install -tags 'postgres' github.com/golang-migrate/migrate/v4/cmd/migrate@latest`
 
 
 4. **Run Database Migrations**
