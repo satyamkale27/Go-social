@@ -107,6 +107,19 @@ func (app *application) getPostHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func (app *application) getAllPostsHandler(w http.ResponseWriter, r *http.Request) {
+	user := getUserFromContext(r)
+	posts, err := app.store.Posts.GetAllUserPosts(r.Context(), user.Id)
+	if err != nil {
+		app.internalServerError(w, r, err)
+	}
+	if err := app.jsonResponse(w, http.StatusOK, posts); err != nil {
+		app.internalServerError(w, r, err)
+		return
+	}
+
+}
+
 func (app *application) deletePostHandler(w http.ResponseWriter, r *http.Request) {
 	idParam := chi.URLParam(r, "postId")
 	id, err := strconv.ParseInt(idParam, 10, 64)

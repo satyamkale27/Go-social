@@ -65,6 +65,11 @@ type dbConfig struct {
 func (app *application) mount() http.Handler {
 	r := chi.NewRouter()
 
+	r.Use(middleware.RequestID)
+	r.Use(middleware.RealIP)
+	r.Use(middleware.Logger) // logs the request data
+	r.Use(middleware.Recoverer)
+
 	r.Use(cors.Handler(cors.Options{
 		// cors allowed
 		AllowedOrigins:   []string{"https://*", "http://*"},
@@ -75,11 +80,6 @@ func (app *application) mount() http.Handler {
 		MaxAge:           300,
 	}))
 
-	r.Use(middleware.RequestID)
-	r.Use(middleware.RealIP)
-	r.Use(middleware.Logger) // logs the request data
-	r.Use(middleware.Recoverer)
-
 	r.Use(middleware.Timeout(60 * time.Second))
 
 	r.Route("/v1", func(r chi.Router) {
@@ -87,6 +87,7 @@ func (app *application) mount() http.Handler {
 		r.Route("/posts", func(r chi.Router) {
 			r.Use(app.AuthTokenMiddleware)
 			r.Post("/", app.createPostHandler)
+			r.Get("/allUserPosts", app.getAllPostsHandler)
 			r.Route("/{postId}", func(r chi.Router) {
 				r.Use(app.postsContextMiddleware)
 				r.Get("/", app.getPostHandler)

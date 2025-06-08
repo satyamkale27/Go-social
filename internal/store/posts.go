@@ -24,6 +24,9 @@ type PostWithMetaData struct {
 	Post               // it is post embedding
 	CommentCount int64 `json:"comment_count"`
 }
+type AllUserPosts struct {
+	Post
+}
 
 type PostStore struct {
 	db *sql.DB
@@ -154,4 +157,28 @@ func (s *PostStore) Update(ctx context.Context, post *Post) error {
 		}
 	}
 	return nil
+}
+
+func (s *PostStore) GetAllUserPosts(ctx context.Context, userid int64) ([]AllUserPosts, error) {
+	query := `SELECT p.id,p.title,p.content,p.created_at,p.version,p.tags FROM posts p JOIN users ON p.user_id = users.id WHERE user_id = $1 ORDER BY p.created_at DESC`
+
+	ctx, cancel := context.WithTimeout(ctx, QueryTimeOutDuration)
+	defer cancel()
+	rows, err := s.db.QueryContext(ctx, query, userid)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var userPosts []AllUserPosts
+	for rows.Next() {
+		var up AllUserPosts
+		err := rows.Scan(&up.Id, &up.Title, &up.Content, &up.CreatedAt, &up.Version, pq.Array(&up.Tags))
+		if err != nil {
+			return nil, err
+		}
+		userPosts = append(userPosts, up)
+	}
+
+	return userPosts, nil
+
 }
