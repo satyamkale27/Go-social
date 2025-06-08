@@ -1,0 +1,25 @@
+name: Build and Run Docker Container
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  build-and-run:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Docker
+        uses: docker/setup-buildx-action@v2
+
+      - name: Build Docker image
+        run: |
+          docker build -t gosocial:latest .
+
+      - name: Run Docker container
+        run: |
+          docker run -d -p 8080:8080 --env-file .envrc --name gosocial-app gosocial:latest
